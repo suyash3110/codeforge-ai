@@ -4,6 +4,7 @@ from app.schemas.repository import RepositoryRequest
 from app.services.git_service import clone_repository
 from app.parser.repository_parser import parse_repository
 from app.chunker.code_chunker import chunk_repository
+from app.vectorstore.chroma_service import store_chunks
 
 router = APIRouter()
 
@@ -18,11 +19,13 @@ async def analyze_repository(request: RepositoryRequest):
 
         chunks = chunk_repository(files)
 
+        store_chunks(chunks)
+
         return {
             "repository_path": repo_path,
             "total_files": len(files),
             "total_chunks": len(chunks),
-            "sample_chunk": chunks[0] if chunks else None,
+            "message": "Repository successfully indexed into ChromaDB"
         }
 
     except Exception as e:
