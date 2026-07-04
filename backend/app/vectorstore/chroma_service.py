@@ -27,8 +27,41 @@ def store_chunks(chunks):
             "end_line": chunk["end_line"],
         })
 
+    try:
+        collection.delete(where={})
+    except Exception:
+        pass
+
     collection.add(
         ids=ids,
         documents=documents,
         metadatas=metadatas
     )
+
+
+def search_chunks(question: str, n_results: int = 5):
+
+    results = collection.query(
+        query_texts=[question],
+        n_results=n_results
+    )
+
+    documents = results["documents"][0]
+
+    metadatas = results["metadatas"][0]
+
+    context = []
+
+    for doc, meta in zip(documents, metadatas):
+
+        context.append(
+            f"""
+FILE: {meta['file']}
+PATH: {meta['path']}
+LINES: {meta['start_line']} - {meta['end_line']}
+
+{doc}
+"""
+        )
+
+    return "\n\n".join(context)

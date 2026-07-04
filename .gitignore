@@ -32,3 +32,12 @@ build/
 
 # Cloned repositories
 backend/repositories/
+backend/temp/
+# ChromaDB
+backend/database/
+
+# Zip files
+*.zip
+
+# Temp repositories
+backend/temp/
