@@ -1,40 +1,109 @@
-from fastapi import APIRouter, HTTPException
+from pathlib import Path
+
+from fastapi import APIRouter, HTTPException, Query
 
 from app.schemas.repository import RepositoryRequest
-from app.services.git_service import clone_repository
-from app.parser.repository_parser import parse_repository
-from app.parser.repository_analyzer import analyze_repository
-from app.chunker.code_chunker import chunk_repository
-from app.vectorstore.chroma_service import store_chunks
+from app.services.repository_service import (
+    analyze,
+    get_tree,
+    get_files,
+    get_dependencies,
+    get_symbols,
+)
 
 router = APIRouter()
 
 
 @router.post("/analyze")
-async def analyze_repository_api(request: RepositoryRequest):
+async def analyze_repository(request: RepositoryRequest):
+    try:
+        return analyze(request.github_url)
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=str(e),
+        )
+
+
+@router.get("/tree")
+async def repository_tree():
+    return {
+        "tree": get_tree()
+    }
+
+
+@router.get("/files")
+async def repository_files():
+
+    files = get_files()
+
+    return {
+        "files": [
+            {
+                "name": file["name"],
+                "path": file["path"],
+                "extension": file["extension"],
+                "size": file["size"],
+            }
+            for file in files
+        ]
+    }
+
+
+@router.get("/dependencies")
+async def repository_dependencies():
+
+    return {
+        "dependencies": get_dependencies()
+    }
+
+
+@router.get("/symbols")
+async def repository_symbols():
+
+    return {
+        "symbols": get_symbols()
+    }
+
+
+@router.get("/file")
+async def repository_file(
+    path: str = Query(...)
+):
 
     try:
 
-        # Clone repository
-        repo_path = clone_repository(request.github_url)
+        file_path = Path(path)
 
-        # Parse repository
-        files = parse_repository(repo_path)
+        if not file_path.exists():
 
-        # Analyze repository
-        summary = analyze_repository(repo_path, files)
+            raise HTTPException(
+                status_code=404,
+                detail="File not found",
+            )
 
-        # Chunk files
-        chunks = chunk_repository(files)
+        with open(
+            file_path,
+            "r",
+            encoding="utf-8",
+            errors="ignore",
+        ) as f:
 
-        # Store chunks in ChromaDB
-        store_chunks(chunks)
+            content = f.read()
 
         return {
-            "summary": summary,
-            "total_chunks": len(chunks),
-            "message": "Repository indexed successfully"
+            "name": file_path.name,
+            "path": str(file_path),
+            "content": content,
         }
 
+    except HTTPException:
+        raise
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(e),
+        )

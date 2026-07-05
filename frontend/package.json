@@ -9,9 +9,17 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
     "next": "16.2.10",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-arborist": "^3.13.1",
+    "react-dom": "19.2.4",
+    "react-file-icon": "^1.6.0",
+    "react-icons": "^5.7.0",
+    "react-markdown": "^10.1.0",
+    "react-syntax-highlighter": "^16.1.1",
+    "reactflow": "^11.11.4",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
