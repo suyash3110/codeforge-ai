@@ -6,7 +6,7 @@ import { analyzeRepository } from "@/lib/api";
 
 import SummaryGrid from "./SummaryGrid";
 import RepositoryWorkspace from "./RepositoryWorkspace";
-import ArchitectureGraph from "./ArchitectureGraph";
+import ArchitectureGraph from "./LanguageGraph";
 
 export default function RepositoryForm() {
   const [repoUrl, setRepoUrl] = useState("");
