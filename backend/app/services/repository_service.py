@@ -13,6 +13,8 @@ from app.vectorstore.chroma_service import store_chunks
 from app.utils.tree_builder import build_tree
 from app.services.symbol_index_service import build_symbol_index
 
+from app.services.call_graph_service import build_repository_call_graph
+
 def analyze(github_url: str):
 
     repo_path = clone_repository(github_url)
@@ -31,6 +33,8 @@ def analyze(github_url: str):
     dependency_map = build_dependency_map(files)
 
     symbol_index = build_symbol_index(files)
+
+    call_graph = build_repository_call_graph(files)
 
     store_chunks(chunks)
 
@@ -100,3 +104,6 @@ def get_root():
 
 def get_symbols():
     return repository_index.get_symbols()
+
+def get_call_graph():
+    return repository_index.get_call_graph()

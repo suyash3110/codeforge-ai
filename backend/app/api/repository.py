@@ -9,6 +9,7 @@ from app.services.repository_service import (
     get_files,
     get_dependencies,
     get_symbols,
+    get_call_graph,
 )
 
 router = APIRouter()
@@ -18,7 +19,6 @@ router = APIRouter()
 async def analyze_repository(request: RepositoryRequest):
     try:
         return analyze(request.github_url)
-
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -53,7 +53,6 @@ async def repository_files():
 
 @router.get("/dependencies")
 async def repository_dependencies():
-
     return {
         "dependencies": get_dependencies()
     }
@@ -61,9 +60,15 @@ async def repository_dependencies():
 
 @router.get("/symbols")
 async def repository_symbols():
-
     return {
         "symbols": get_symbols()
+    }
+
+
+@router.get("/call-graph")
+async def repository_call_graph():
+    return {
+        "call_graph": get_call_graph()
     }
 
 
@@ -77,7 +82,6 @@ async def repository_file(
         file_path = Path(path)
 
         if not file_path.exists():
-
             raise HTTPException(
                 status_code=404,
                 detail="File not found",
@@ -89,7 +93,6 @@ async def repository_file(
             encoding="utf-8",
             errors="ignore",
         ) as f:
-
             content = f.read()
 
         return {
@@ -102,7 +105,6 @@ async def repository_file(
         raise
 
     except Exception as e:
-
         raise HTTPException(
             status_code=500,
             detail=str(e),

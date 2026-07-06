@@ -1,6 +1,6 @@
 class RepositoryIndex:
     """
-    Central in-memory cache for the currently analyzed repository.
+    Central in-memory repository cache.
     """
 
     def __init__(self):
@@ -12,6 +12,7 @@ class RepositoryIndex:
         self.files = []
         self.dependencies = {}
         self.symbols = {}
+        self.call_graph = {}
         self.chunks = []
         self.readme = ""
         self.root = ""
@@ -24,6 +25,7 @@ class RepositoryIndex:
         files,
         dependencies,
         symbols,
+        call_graph,
         chunks,
         readme,
         root,
@@ -33,6 +35,7 @@ class RepositoryIndex:
         self.files = files
         self.dependencies = dependencies
         self.symbols = symbols
+        self.call_graph = call_graph
         self.chunks = chunks
         self.readme = readme
         self.root = root
@@ -51,6 +54,9 @@ class RepositoryIndex:
 
     def get_symbols(self):
         return self.symbols
+
+    def get_call_graph(self):
+        return self.call_graph
 
     def get_chunks(self):
         return self.chunks
