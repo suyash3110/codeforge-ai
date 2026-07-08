@@ -3,6 +3,10 @@ from pathlib import Path
 from app.services.git_service import clone_repository
 from app.services.dependency_service import build_dependency_map
 from app.services.repository_index import repository_index
+from app.services.symbol_index_service import build_symbol_index
+from app.services.call_graph_service import build_repository_call_graph
+from app.services.security_scanner_service import scan_repository
+from app.services.semantic_search_service import semantic_search
 
 from app.parser.repository_parser import parse_repository
 from app.parser.repository_analyzer import analyze_repository
@@ -11,9 +15,7 @@ from app.chunker.code_chunker import chunk_repository
 from app.vectorstore.chroma_service import store_chunks
 
 from app.utils.tree_builder import build_tree
-from app.services.symbol_index_service import build_symbol_index
 
-from app.services.call_graph_service import build_repository_call_graph
 
 def analyze(github_url: str):
 
@@ -35,6 +37,8 @@ def analyze(github_url: str):
     symbol_index = build_symbol_index(files)
 
     call_graph = build_repository_call_graph(files)
+
+    security_report = scan_repository(files)
 
     store_chunks(chunks)
 
@@ -58,21 +62,28 @@ def analyze(github_url: str):
             break
 
     repository_index.load(
-    summary=summary,
-    tree=tree,
-    files=files,
-    dependencies=dependency_map,
-    symbols=symbol_index,
-    chunks=chunks,
-    readme=readme,
-    root=str(root),
-)
+        summary=summary,
+        tree=tree,
+        files=files,
+        dependencies=dependency_map,
+        symbols=symbol_index,
+        call_graph=call_graph,
+        security_report=security_report,
+        chunks=chunks,
+        readme=readme,
+        root=str(root),
+    )
 
     return {
         "summary": summary,
         "total_chunks": len(chunks),
         "total_dependencies": len(dependency_map),
+        "security_issues": len(security_report),
     }
+
+
+def search_repository(query: str):
+    return semantic_search(query)
 
 
 def get_summary():
@@ -91,6 +102,18 @@ def get_dependencies():
     return repository_index.get_dependencies()
 
 
+def get_symbols():
+    return repository_index.get_symbols()
+
+
+def get_call_graph():
+    return repository_index.get_call_graph()
+
+
+def get_security_report():
+    return repository_index.get_security_report()
+
+
 def get_chunks():
     return repository_index.get_chunks()
 
@@ -101,9 +124,3 @@ def get_readme():
 
 def get_root():
     return repository_index.get_root()
-
-def get_symbols():
-    return repository_index.get_symbols()
-
-def get_call_graph():
-    return repository_index.get_call_graph()

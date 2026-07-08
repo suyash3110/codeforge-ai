@@ -10,6 +10,7 @@ import {
   generateTests,
   optimizeCode,
   reviewEntireRepository,
+  getSecurityReport,
 } from "@/lib/api";
 
 import FileTree, { TreeNode } from "./FileTree";
@@ -18,8 +19,10 @@ import ChatPanel from "./ChatPanel";
 import AIActions from "./AIActions";
 import AIAssistant from "./AIAssistant";
 import Breadcrumb from "./Breadcrumb";
+import SecurityReport from "./SecurityReport";
 
 export default function RepositoryWorkspace() {
+
   const [tree, setTree] = useState<TreeNode[]>([]);
 
   const [selectedFile, setSelectedFile] = useState("");
@@ -34,25 +37,40 @@ export default function RepositoryWorkspace() {
 
   const [currentAction, setCurrentAction] = useState("");
 
+  const [securityReport, setSecurityReport] = useState<any>({});
+
+  const [showSecurity, setShowSecurity] = useState(false);
+
   useEffect(() => {
+
     async function loadTree() {
+
       try {
+
         const response = await getRepositoryTree();
 
         setTree(response.tree);
+
       } catch (err) {
+
         console.error(err);
+
       }
+
     }
 
     loadTree();
+
   }, []);
 
   useEffect(() => {
+
     async function loadFile() {
+
       if (!selectedFile) return;
 
       try {
+
         const response = await getFileContent(selectedFile);
 
         setContent(response.content);
@@ -62,12 +80,17 @@ export default function RepositoryWorkspace() {
         setError("");
 
         setCurrentAction("");
+
       } catch (err) {
+
         console.error(err);
+
       }
+
     }
 
     loadFile();
+
   }, [selectedFile]);
 
   const fileName =
@@ -77,52 +100,102 @@ export default function RepositoryWorkspace() {
     fn: (file: string, code: string) => Promise<any>,
     action: string
   ) {
+
     if (!content) return;
 
     try {
+
       setLoading(true);
 
       setError("");
 
       setCurrentAction(action);
 
-      const response = await fn(fileName, content);
+      setShowSecurity(false);
+
+      const response = await fn(
+        fileName,
+        content
+      );
 
       setAIResult(response.answer);
+
     } catch (err) {
+
       console.error(err);
 
       setError("Unable to contact Gemini.");
 
       setAIResult("");
+
     } finally {
+
       setLoading(false);
+
     }
+
   }
 
   async function executeRepositoryReview() {
+
     try {
+
       setLoading(true);
 
       setError("");
 
       setCurrentAction("Repository Review");
 
+      setShowSecurity(false);
+
       const response = await reviewEntireRepository();
 
       setAIResult(response.answer);
+
     } catch (err) {
+
       console.error(err);
 
       setError("Repository review failed.");
 
-      setAIResult("");
     } finally {
+
       setLoading(false);
+
     }
+
+  }
+
+  async function loadSecurityReport() {
+
+    try {
+
+      setLoading(true);
+
+      setError("");
+
+      const response = await getSecurityReport();
+
+      setSecurityReport(response.security_report);
+
+      setShowSecurity(true);
+
+    } catch (err) {
+
+      console.error(err);
+
+      setError("Unable to load security report.");
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
   }
 
   return (
+
     <div className="mt-12 space-y-8">
 
       <Breadcrumb path={selectedFile} />
@@ -144,48 +217,59 @@ export default function RepositoryWorkspace() {
           <AIActions
             loading={loading}
             onExplain={() =>
-              executeAI(
-                explainFile,
-                "Explain"
-              )
+              executeAI(explainFile, "Explain")
             }
             onReview={() =>
-              executeAI(
-                reviewFile,
-                "Review"
-              )
+              executeAI(reviewFile, "Review")
             }
             onTests={() =>
-              executeAI(
-                generateTests,
-                "Generate Tests"
-              )
+              executeAI(generateTests, "Generate Tests")
             }
             onOptimize={() =>
-              executeAI(
-                optimizeCode,
-                "Optimize"
-              )
+              executeAI(optimizeCode, "Optimize")
             }
-            onRepositoryReview={executeRepositoryReview}
+            onRepositoryReview={
+              executeRepositoryReview
+            }
           />
+
+          <button
+            onClick={loadSecurityReport}
+            className="rounded-xl bg-red-600 px-6 py-3 font-semibold hover:bg-red-700"
+          >
+            🔒 Security Report
+          </button>
 
           <MonacoViewer
             fileName={fileName}
             content={content}
           />
 
-          <AIAssistant
-            loading={loading}
-            result={aiResult}
-            error={error}
-            action={currentAction}
-            onClear={() => {
-              setAIResult("");
-              setError("");
-              setCurrentAction("");
-            }}
-          />
+          {showSecurity ? (
+
+            <SecurityReport
+              report={securityReport}
+            />
+
+          ) : (
+
+            <AIAssistant
+              loading={loading}
+              result={aiResult}
+              error={error}
+              action={currentAction}
+              onClear={() => {
+
+                setAIResult("");
+
+                setError("");
+
+                setCurrentAction("");
+
+              }}
+            />
+
+          )}
 
         </div>
 
@@ -194,5 +278,7 @@ export default function RepositoryWorkspace() {
       <ChatPanel />
 
     </div>
+
   );
+
 }

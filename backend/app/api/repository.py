@@ -11,6 +11,7 @@ from app.services.repository_service import (
     get_dependencies,
     get_symbols,
     get_call_graph,
+    get_security_report,
 )
 
 from app.services.architecture_graph_service import (
@@ -89,6 +90,14 @@ async def repository_call_graph():
 async def architecture_graph():
 
     return build_architecture_graph()
+
+
+@router.get("/security-report")
+async def repository_security():
+
+    return {
+        "security_report": get_security_report()
+    }
 
 
 @router.get("/file")

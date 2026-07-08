@@ -42,7 +42,35 @@ export async function getFileContent(path: string) {
   return request(`/file?path=${encodeURIComponent(path)}`);
 }
 
-async function fileAI(endpoint: string, fileName: string, code: string) {
+export async function getRepositoryFiles() {
+  return request("/files");
+}
+
+export async function getRepositoryDependencies() {
+  return request("/dependencies");
+}
+
+export async function getRepositorySymbols() {
+  return request("/symbols");
+}
+
+export async function getRepositoryCallGraph() {
+  return request("/call-graph");
+}
+
+export async function getArchitectureGraph() {
+  return request("/architecture-graph");
+}
+
+export async function getSecurityReport() {
+  return request("/security-report");
+}
+
+async function fileAI(
+  endpoint: string,
+  fileName: string,
+  code: string
+) {
   return request(endpoint, {
     method: "POST",
     headers: {
@@ -55,29 +83,28 @@ async function fileAI(endpoint: string, fileName: string, code: string) {
   });
 }
 
-export const explainFile = (fileName: string, code: string) =>
-  fileAI("/explain", fileName, code);
+export const explainFile = (
+  fileName: string,
+  code: string
+) => fileAI("/explain", fileName, code);
 
-export const reviewFile = (fileName: string, code: string) =>
-  fileAI("/review", fileName, code);
+export const reviewFile = (
+  fileName: string,
+  code: string
+) => fileAI("/review", fileName, code);
 
-export const generateTests = (fileName: string, code: string) =>
-  fileAI("/tests", fileName, code);
+export const generateTests = (
+  fileName: string,
+  code: string
+) => fileAI("/tests", fileName, code);
 
-export const optimizeCode = (fileName: string, code: string) =>
-  fileAI("/optimize", fileName, code);
+export const optimizeCode = (
+  fileName: string,
+  code: string
+) => fileAI("/optimize", fileName, code);
+
 export async function reviewEntireRepository() {
-
-  const response = await fetch(
-    `${API_BASE_URL}/repository-review`,
-    {
-      method: "POST",
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Repository review failed");
-  }
-
-  return response.json();
+  return request("/repository-review", {
+    method: "POST",
+  });
 }

@@ -19,36 +19,45 @@ def store_chunks(chunks):
 
         documents.append(chunk["content"])
 
-        metadatas.append({
-            "file": chunk["file"],
-            "path": chunk["path"],
-            "extension": chunk["extension"],
-            "start_line": chunk["start_line"],
-            "end_line": chunk["end_line"],
-        })
+        metadatas.append(
+            {
+                "file": chunk["file"],
+                "path": chunk["path"],
+                "extension": chunk["extension"],
+                "start_line": chunk["start_line"],
+                "end_line": chunk["end_line"],
+            }
+        )
 
     try:
         collection.delete(where={})
     except Exception:
         pass
 
-    collection.add(
-        ids=ids,
-        documents=documents,
-        metadatas=metadatas
-    )
+    if ids:
+        collection.add(
+            ids=ids,
+            documents=documents,
+            metadatas=metadatas,
+        )
 
 
-def search_chunks(question: str, n_results: int = 5):
+def search_chunks(
+    question: str,
+    n_results: int = 5,
+    k: int | None = None,
+):
+
+    if k is not None:
+        n_results = k
 
     results = collection.query(
         query_texts=[question],
-        n_results=n_results
+        n_results=n_results,
     )
 
-    documents = results["documents"][0]
-
-    metadatas = results["metadatas"][0]
+    documents = results.get("documents", [[]])[0]
+    metadatas = results.get("metadatas", [[]])[0]
 
     context = []
 

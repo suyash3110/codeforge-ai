@@ -13,6 +13,7 @@ class RepositoryIndex:
         self.dependencies = {}
         self.symbols = {}
         self.call_graph = {}
+        self.security_report = {}
         self.chunks = []
         self.readme = ""
         self.root = ""
@@ -26,6 +27,7 @@ class RepositoryIndex:
         dependencies,
         symbols,
         call_graph,
+        security_report,
         chunks,
         readme,
         root,
@@ -36,6 +38,7 @@ class RepositoryIndex:
         self.dependencies = dependencies
         self.symbols = symbols
         self.call_graph = call_graph
+        self.security_report = security_report
         self.chunks = chunks
         self.readme = readme
         self.root = root
@@ -57,6 +60,9 @@ class RepositoryIndex:
 
     def get_call_graph(self):
         return self.call_graph
+
+    def get_security_report(self):
+        return self.security_report
 
     def get_chunks(self):
         return self.chunks
