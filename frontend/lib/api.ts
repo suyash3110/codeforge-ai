@@ -88,6 +88,9 @@ export const explainFile = (
   code: string
 ) => fileAI("/explain", fileName, code);
 
+export async function getRepositoryMetrics() {
+  return request("/repository-metrics");
+}
 export const reviewFile = (
   fileName: string,
   code: string
@@ -107,4 +110,22 @@ export async function reviewEntireRepository() {
   return request("/repository-review", {
     method: "POST",
   });
+}
+export async function semanticSearch(
+  query: string
+) {
+
+  return request(
+    `/semantic-search?query=${encodeURIComponent(query)}`
+  );
+
+} 
+export async function generateDocumentation() {
+
+  return request("/generate-docs", {
+
+    method: "POST",
+
+  });
+
 }

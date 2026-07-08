@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import {
   getRepositoryTree,
+  getRepositoryMetrics,
   getFileContent,
   explainFile,
   reviewFile,
@@ -20,6 +21,9 @@ import AIActions from "./AIActions";
 import AIAssistant from "./AIAssistant";
 import Breadcrumb from "./Breadcrumb";
 import SecurityReport from "./SecurityReport";
+import RepositoryDashboard from "./RepositoryDashboard";
+import SemanticSearch from "./SemanticSearch";
+import DocumentationGenerator from "./DocumentationGenerator";
 
 export default function RepositoryWorkspace() {
 
@@ -39,7 +43,11 @@ export default function RepositoryWorkspace() {
 
   const [securityReport, setSecurityReport] = useState<any>({});
 
+  const [metrics, setMetrics] = useState<any>(null);
+
   const [showSecurity, setShowSecurity] = useState(false);
+
+  const [showDashboard, setShowDashboard] = useState(true);
 
   useEffect(() => {
 
@@ -59,7 +67,25 @@ export default function RepositoryWorkspace() {
 
     }
 
+    async function loadMetrics() {
+
+      try {
+
+        const response = await getRepositoryMetrics();
+
+        setMetrics(response);
+
+      } catch (err) {
+
+        console.error(err);
+
+      }
+
+    }
+
     loadTree();
+
+    loadMetrics();
 
   }, []);
 
@@ -111,6 +137,8 @@ export default function RepositoryWorkspace() {
 
       setCurrentAction(action);
 
+      setShowDashboard(false);
+
       setShowSecurity(false);
 
       const response = await fn(
@@ -146,6 +174,8 @@ export default function RepositoryWorkspace() {
 
       setCurrentAction("Repository Review");
 
+      setShowDashboard(false);
+
       setShowSecurity(false);
 
       const response = await reviewEntireRepository();
@@ -173,6 +203,8 @@ export default function RepositoryWorkspace() {
       setLoading(true);
 
       setError("");
+
+      setShowDashboard(false);
 
       const response = await getSecurityReport();
 
@@ -213,6 +245,20 @@ export default function RepositoryWorkspace() {
         </div>
 
         <div className="col-span-9 space-y-6">
+
+          {showDashboard && (
+  <div className="space-y-6">
+
+    <RepositoryDashboard
+      metrics={metrics}
+    />
+
+    <SemanticSearch />
+
+    <DocumentationGenerator />
+
+  </div>
+)}
 
           <AIActions
             loading={loading}
@@ -265,6 +311,10 @@ export default function RepositoryWorkspace() {
                 setError("");
 
                 setCurrentAction("");
+
+                setShowDashboard(true);
+
+                setShowSecurity(false);
 
               }}
             />

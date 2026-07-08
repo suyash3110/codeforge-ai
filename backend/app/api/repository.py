@@ -1,5 +1,5 @@
 from pathlib import Path
-
+from app.services.repository_service import search_repository
 from fastapi import APIRouter, HTTPException, Query
 
 from app.schemas.repository import RepositoryRequest
@@ -98,7 +98,12 @@ async def repository_security():
     return {
         "security_report": get_security_report()
     }
+@router.get("/semantic-search")
+async def semantic_search(
+    query: str = Query(...)
+):
 
+    return search_repository(query)
 
 @router.get("/file")
 async def repository_file(

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { generateDocumentation } from "@/lib/api";
+import MarkdownViewer from "./MarkdownViewer";
 
 export default function DocumentationGenerator() {
 
@@ -38,18 +39,14 @@ export default function DocumentationGenerator() {
       <div className="flex items-center justify-between">
 
         <h2 className="text-2xl font-bold">
-
           📄 AI Documentation
-
         </h2>
 
         <button
           onClick={generate}
           className="rounded-lg bg-blue-600 px-5 py-2 hover:bg-blue-700"
         >
-
           Generate
-
         </button>
 
       </div>
@@ -57,20 +54,20 @@ export default function DocumentationGenerator() {
       {loading && (
 
         <p className="mt-5 text-zinc-400">
-
           Generating documentation...
-
         </p>
 
       )}
 
       {!!docs && (
 
-        <pre className="mt-6 overflow-auto whitespace-pre-wrap rounded-xl bg-zinc-950 p-5">
+        <div className="mt-6">
 
-          {docs}
+          <MarkdownViewer
+            content={docs}
+          />
 
-        </pre>
+        </div>
 
       )}
 

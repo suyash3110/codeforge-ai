@@ -7,6 +7,9 @@ from app.services.symbol_index_service import build_symbol_index
 from app.services.call_graph_service import build_repository_call_graph
 from app.services.security_scanner_service import scan_repository
 from app.services.semantic_search_service import semantic_search
+from app.services.repository_metrics_service import (
+    build_repository_metrics,
+)
 
 from app.parser.repository_parser import parse_repository
 from app.parser.repository_analyzer import analyze_repository
@@ -17,7 +20,12 @@ from app.vectorstore.chroma_service import store_chunks
 from app.utils.tree_builder import build_tree
 
 
+_metrics = {}
+
+
 def analyze(github_url: str):
+
+    global _metrics
 
     repo_path = clone_repository(github_url)
 
@@ -39,6 +47,13 @@ def analyze(github_url: str):
     call_graph = build_repository_call_graph(files)
 
     security_report = scan_repository(files)
+
+    _metrics = build_repository_metrics(
+        files,
+        dependency_map,
+        symbol_index,
+        security_report,
+    )
 
     store_chunks(chunks)
 
@@ -84,6 +99,10 @@ def analyze(github_url: str):
 
 def search_repository(query: str):
     return semantic_search(query)
+
+
+def get_repository_metrics():
+    return _metrics
 
 
 def get_summary():

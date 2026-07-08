@@ -8,6 +8,10 @@ from app.services.ai_service import (
     optimize_code,
 )
 
+from app.services.documentation_service import (
+    generate_documentation,
+)
+
 router = APIRouter()
 
 
@@ -86,6 +90,23 @@ async def optimize(request: FileRequest):
                 request.file_name,
                 request.code,
             )
+        }
+
+    except Exception as e:
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(e),
+        )
+
+
+@router.post("/generate-docs")
+async def generate_docs():
+
+    try:
+
+        return {
+            "answer": generate_documentation()
         }
 
     except Exception as e:
